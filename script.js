@@ -7,6 +7,7 @@ let gridMatrix = [];
 
 // Initialize the grid
 function createGrid() {
+    grid.innerHTML = ''; // Clear existing grid
     for (let i = 0; i < gridSize; i++) {
         gridMatrix[i] = [];
         for (let j = 0; j < gridSize; j++) {
@@ -22,6 +23,7 @@ function createGrid() {
 function generateBlock() {
     const block = document.createElement('div');
     block.classList.add('block');
+    block.innerText = 'Block'; // Add text so you can see the blocks
     block.addEventListener('click', () => placeBlock(block));
     nextBlocks.appendChild(block);
 }
@@ -33,7 +35,7 @@ function placeBlock(block) {
         for (let j = 0; j < gridSize; j++) {
             if (gridMatrix[i][j] === 0) {
                 const cellIndex = i * gridSize + j;
-                grid.children[cellIndex].style.backgroundColor = '#0095DD';
+                grid.children[cellIndex].style.backgroundColor = '#0095DD'; // Show block placement
                 gridMatrix[i][j] = 1; // Mark the cell as filled
                 nextBlocks.removeChild(block);
                 checkLineClear();
