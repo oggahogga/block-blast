@@ -16,7 +16,7 @@ h1 {
 
 #grid {
     display: grid;
-    grid-template-columns: repeat(10, 40px);
+    grid-template-columns: repeat(10, 40px); /* Create a 10x10 grid */
     grid-gap: 2px;
     background-color: #444;
     padding: 10px;
