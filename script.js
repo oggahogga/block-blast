@@ -1,87 +1,76 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 800;
-canvas.height = 600;
+const grid = document.getElementById('grid');
+const nextBlocks = document.getElementById('nextBlocks');
+const restartButton = document.getElementById('restartButton');
 
-let blocks = [];
-let dragIndex = -1;
-let dragging = false;
-let offsetX, offsetY;
+const gridSize = 10; // 10x10 grid
+let gridMatrix = [];
 
-// Create a block object
-function Block(x, y, width, height, color) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.color = color;
-    this.isDragging = false;
-
-    this.draw = function() {
-        ctx.beginPath();
-        ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.closePath();
-    };
-}
-
-// Create initial blocks
-blocks.push(new Block(100, 100, 100, 100, "#FF0000"));
-blocks.push(new Block(300, 100, 100, 100, "#00FF00"));
-blocks.push(new Block(500, 100, 100, 100, "#0000FF"));
-
-// Function to detect if the mouse is inside a block
-function mouseInBlock(block, x, y) {
-    return (x > block.x && x < block.x + block.width && y > block.y && y < block.y + block.height);
-}
-
-// Mouse event handlers
-canvas.onmousedown = function(e) {
-    const mouseX = e.offsetX;
-    const mouseY = e.offsetY;
-
-    // Check if we clicked on a block
-    for (let i = 0; i < blocks.length; i++) {
-        if (mouseInBlock(blocks[i], mouseX, mouseY)) {
-            dragging = true;
-            dragIndex = i;
-            offsetX = mouseX - blocks[i].x;
-            offsetY = mouseY - blocks[i].y;
-            blocks[i].isDragging = true;
-            break;
+// Initialize the grid
+function createGrid() {
+    for (let i = 0; i < gridSize; i++) {
+        gridMatrix[i] = [];
+        for (let j = 0; j < gridSize; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            gridMatrix[i][j] = 0; // Empty cell
+            grid.appendChild(cell);
         }
     }
-};
-
-canvas.onmousemove = function(e) {
-    if (dragging) {
-        const mouseX = e.offsetX;
-        const mouseY = e.offsetY;
-
-        // Move the block with the mouse
-        const block = blocks[dragIndex];
-        block.x = mouseX - offsetX;
-        block.y = mouseY - offsetY;
-
-        draw();
-    }
-};
-
-canvas.onmouseup = function() {
-    dragging = false;
-    if (dragIndex !== -1) {
-        blocks[dragIndex].isDragging = false;
-    }
-};
-
-// Draw all blocks
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    blocks.forEach(block => {
-        block.draw();
-    });
 }
 
-draw();
+// Generate random block shapes
+function generateBlock() {
+    const block = document.createElement('div');
+    block.classList.add('block');
+    block.addEventListener('click', () => placeBlock(block));
+    nextBlocks.appendChild(block);
+}
+
+// Place block on grid (simplified logic)
+function placeBlock(block) {
+    // Randomly place on the first available empty space in the grid
+    for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+            if (gridMatrix[i][j] === 0) {
+                const cellIndex = i * gridSize + j;
+                grid.children[cellIndex].style.backgroundColor = '#0095DD';
+                gridMatrix[i][j] = 1; // Mark the cell as filled
+                nextBlocks.removeChild(block);
+                checkLineClear();
+                generateBlock(); // Generate new block after placing one
+                return;
+            }
+        }
+    }
+}
+
+// Check if a line or column is filled
+function checkLineClear() {
+    for (let i = 0; i < gridSize; i++) {
+        if (gridMatrix[i].every(cell => cell === 1)) {
+            clearRow(i);
+        }
+    }
+}
+
+// Clear a filled row
+function clearRow(rowIndex) {
+    for (let i = 0; i < gridSize; i++) {
+        gridMatrix[rowIndex][i] = 0; // Reset row in matrix
+        const cellIndex = rowIndex * gridSize + i;
+        grid.children[cellIndex].style.backgroundColor = '#555'; // Reset cell color
+    }
+}
+
+// Restart the game
+restartButton.addEventListener('click', () => {
+    grid.innerHTML = '';
+    nextBlocks.innerHTML = '';
+    gridMatrix = [];
+    createGrid();
+    generateBlock();
+});
+
+// Initialize game
+createGrid();
+generateBlock();
